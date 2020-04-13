@@ -239,7 +239,8 @@ int leastBitPos(int x) {
  */
 int bitCount(int x) {
   int m = 0x0;
-  m = 1 | (1 << 8) | (1 << 16) | (1 << 24);
+  m = 1 | (1 << 8);
+  m = m | (m << 16);
   x = (x & m) + ((x >> 1) & m) + ((x >> 2) & m) + ((x >> 3) & m) + ((x >> 4) & m) + ((x >> 5) & m) + ((x >> 6) & m) + ((x >> 7) & m);
   m = 0x0F;
   x = (x & m) + ((x >> 8) & m) + ((x >> 16) & m) + ((x >> 24) & m);
@@ -268,7 +269,11 @@ int bang(int x) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  return 2;
+  int m = 32 + ~n + 1;
+  int y = x;
+  x = (x << m) >> m;
+  x = x + ~y + 1;
+  return !x;
 }
 /* 
  * evenBits - return word with all even-numbered bits set to 1
@@ -277,7 +282,10 @@ int fitsBits(int x, int n) {
  *   Rating: 1
  */
 int evenBits(void) {
-  return 2;
+  int m = 0x55;
+  m = m | (m << 8);
+  m = m | (m << 16);
+  return m;
 }
 /* 
  * negate - return -x 
@@ -287,7 +295,7 @@ int evenBits(void) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return ~x + 1;
 }
 /* 
  * isPositive - return 1 if x > 0, return 0 otherwise 
@@ -297,7 +305,10 @@ int negate(int x) {
  *   Rating: 3
  */
 int isPositive(int x) {
-  return 2;
+  //return (~(x >> 31));
+  //(((x >> 31) | ((~x + 1) >> 31)) & 1) ^ 1;
+  
+  return !(((x >> 31) | (!x)) & 1);
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -307,7 +318,15 @@ int isPositive(int x) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+  int p = ((x & ~y) >> 31); //1 neu x<0,y>=0
+  int q = ((~x & y) >> 31); //1 neu x>=0,y<0
+  //((x >> 31) | (!x)) & 1 : ra 1 neu <=0, ra 0 neu > 0
+  int res = (x + (~y + 1));
+  //printf("the res = %d\n",res);
+  int r = ((res >> 31) | (!res));
+  //printf("q = %d\n", q);
+
+  return (p | (~q & r)) & 1;
 }
 /* 
  * float_neg - Return bit-level equivalent of expression -f for
@@ -321,7 +340,12 @@ int isLessOrEqual(int x, int y) {
  *   Rating: 2
  */
 unsigned float_neg(unsigned uf) {
- return 2;
+  unsigned mNaN = 0x7f800000 & uf;
+  unsigned mFrac = 0x007FFFFF & uf;
+  if (mNaN == 0x7f800000 && mFrac)
+    return uf;
+  else
+    return uf ^ 0x80000000;
 }
 /* 
  * float_abs - Return bit-level equivalent of absolute value of f for
@@ -335,5 +359,10 @@ unsigned float_neg(unsigned uf) {
  *   Rating: 2
  */
 unsigned float_abs(unsigned uf) {
-  return 2;
+  unsigned mNaN = 0x7f800000 & uf;
+  unsigned mFrac = 0x007FFFFF & uf;
+  if (mNaN == 0x7f800000 && mFrac)
+    return uf;
+  else
+    return (uf << 1) >> 1;
 }
