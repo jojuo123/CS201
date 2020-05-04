@@ -1,0 +1,6 @@
+For NASA, space is still a high priority.
+00 01 03 06 10 15
+6 638
+14 7
+5 115
+4 3 6 5 1 2
