@@ -147,7 +147,7 @@ void inputHandle()
         ull address;
         int size;
         if (buf[0] == '0') continue;
-        sscanf(buf, " %c %llx,%d", temp, address, size);
+        sscanf(buf, " %c %llx,%d", &temp, &address, &size);
         instruction = getInstruction(&temp);
         // temp = strtok(buf," ,");
         // if (temp == NULL) continue;
