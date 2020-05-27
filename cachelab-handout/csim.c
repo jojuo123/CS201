@@ -139,24 +139,27 @@ void inputHandle()
     
     char buf[255];
     fp = fopen(traceFile, "r");
-    while (fgets(buf, 255, (FILE*)fp))
+    while (fgets(buf, 255, (FILE*)fp) != NULL)
     {
-        char* temp;
+        strtok(buf, "\n");
+        char temp;
         int instruction;
-        int address;
+        ull address;
         int size;
-
-        temp = strtok(buf," ,");
-        if (temp == NULL) continue;
-        instruction = getInstruction(temp);
+        if (buf[0] == '0') continue;
+        sscanf(buf, " %c %llx,%d", temp, address, size);
+        instruction = getInstruction(&temp);
+        // temp = strtok(buf," ,");
+        // if (temp == NULL) continue;
+        // instruction = getInstruction(temp);
         
-        temp = strtok(NULL, " ,");
-        if (temp == NULL) continue;
-        address = strtol(temp, NULL, 0);
+        // temp = strtok(NULL, " ,");
+        // if (temp == NULL) continue;
+        // address = strtol(temp, NULL, 0);
 
-        temp = strtok(NULL, " ,");
-        if (temp == NULL) continue;
-        size = strtol(temp, NULL, 10);
+        // temp = strtok(NULL, " ,");
+        // if (temp == NULL) continue;
+        // size = strtol(temp, NULL, 10);
         
         HandleQuery(instruction, address, size);
     }
