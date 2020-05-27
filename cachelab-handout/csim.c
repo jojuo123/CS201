@@ -112,7 +112,7 @@ void Init()
 
 void HandleQuery(int instruction, int address, int size)
 {
-
+    printf("%d %d %d\n",instruction,address,size);
 }
 
 int getInstruction(char* temp)
