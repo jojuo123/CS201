@@ -188,13 +188,14 @@ uint LoadAndStore(ull address)
             ++result[EVICTION];
             return EVICTION;
     }
+    return 3;
 }
 
 uint Modify(ull address)
 {
     uint set = getSet(address);
     uint tag = getTag(address);
-    uint ret;
+    uint ret = 0;
     uint val = Access(tag, cache.s+set);
     switch (val)
     {
@@ -302,7 +303,7 @@ void inputHandle()
     {
         strtok(buf, "\n");
         char temp;
-        uint instruction;
+        //uint instruction;
         ull address;
         uint size;
         if (buf[0] == '0') continue;
