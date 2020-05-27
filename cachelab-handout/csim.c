@@ -62,7 +62,12 @@ void charDeepCopy(char* source, char* destination)
     uint n = strlen(source) + 1;
     destination = (char*)malloc(n);
     uint i = 0;
-    while (source[i] != '\0') destination[i] = source[i];
+    while (source[i] != '\0') 
+    {
+        destination[i] = source[i];
+        ++i;
+    }
+    destination[i] = '\0';
 }
 
 void getFlag(uint argc, char **argv)
