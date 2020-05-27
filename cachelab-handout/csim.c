@@ -67,7 +67,7 @@ void charDeepCopy(char* source)
         traceFile[i] = source[i];
         ++i;
     }
-    destination[i] = '\0';
+    traceFile[i] = '\0';
 }
 
 void getFlag(uint argc, char **argv)
