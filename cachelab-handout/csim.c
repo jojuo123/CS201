@@ -53,7 +53,7 @@ void Halt()
     }
     free(cache.s);
     cache.s = NULL;
-    close(fp);
+    //close(fp);
     exit(0);
 }
 
@@ -117,7 +117,7 @@ void HandleQuery(int instruction, int address, int size)
 
 int getInstruction(char* temp)
 {
-    if (temp == NULL) return;
+    if (temp == NULL) return -1;
     switch (temp[0])
     {
         case 'I':
@@ -131,13 +131,14 @@ int getInstruction(char* temp)
         default:
             break;
     }
+    return -1;
 }
 
 void inputHandle()
 {
     
     char buf[255];
-    fp = open(traceFile, "r");
+    fp = fopen(traceFile, "r");
     while (fgets(buf, 255, (FILE*)fp))
     {
         char* temp;
@@ -159,14 +160,15 @@ void inputHandle()
         
         HandleQuery(instruction, address, size);
     }
-    close(fp);
+    fclose(fp);
 }
 
-uint main(uint argc, char **argv)
+int main(int argc, char **argv)
 {
     getFlag(argc, argv);
     Init();
-    pruintSummary(0, 0, 0);
+    inputHandle();
+    printSummary(0, 0, 0);
     Halt();
     return 0;
 }
