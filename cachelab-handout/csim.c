@@ -57,14 +57,14 @@ void Halt()
     exit(0);
 }
 
-void charDeepCopy(char* source, char* destination)
+void charDeepCopy(char* source)
 {
     uint n = strlen(source) + 1;
-    destination = (char*)malloc(n);
+    traceFile = (char*)malloc(n);
     uint i = 0;
     while (source[i] != '\0') 
     {
-        destination[i] = source[i];
+        traceFile[i] = source[i];
         ++i;
     }
     destination[i] = '\0';
@@ -84,7 +84,7 @@ void getFlag(uint argc, char **argv)
                 setBit = atoi(optarg);
                 break;
             case 't':
-                charDeepCopy(optarg, traceFile);
+                charDeepCopy(optarg);
                 break;
             case 'b':
                 blockBit = atoi(optarg);
@@ -144,6 +144,10 @@ void inputHandle()
     
     char buf[255];
     fp = fopen(traceFile, "r");
+    if (fp == NULL)
+    {
+        printf("File not found \n");
+    }
     while (fgets(buf, 255, (FILE*)fp) != NULL)
     {
         strtok(buf, "\n");
@@ -175,7 +179,7 @@ int main(int argc, char **argv)
 {
     getFlag(argc, argv);
     Init();
-    inputHandle();
+    //inputHandle();
     printSummary(0, 0, 0);
     Halt();
     return 0;
