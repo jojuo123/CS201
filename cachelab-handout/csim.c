@@ -84,7 +84,7 @@ void getFlag(uint argc, char **argv)
                 setBit = atoi(optarg);
                 break;
             case 't':
-                charDeepCopy(optarg);
+                traceFile = charDeepCopy(optarg);
                 break;
             case 'b':
                 blockBit = atoi(optarg);
