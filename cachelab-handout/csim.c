@@ -21,19 +21,17 @@ uint Eway, setBit, blockBit, tagBit, verbose, noOfSet;
 FILE* fp;
 char* traceFile;
 
-
 struct Way {
     ull time;
     uint valid;
     uint tag;
-    uint block;
+    //uint block;
 };
 
 typedef struct Way sWay;
 
 struct Set {
     uint LRU;
-    //uint set;
     sWay* way;
 };
 
@@ -54,21 +52,22 @@ void Halt()
     }
     free(cache.s);
     cache.s = NULL;
-    //close(fp);
     exit(0);
 }
 
-void charDeepCopy(char* source)
+char* charDeepCopy(char* source)
 {
+    if (!source) return NULL;
     uint n = strlen(source) + 1;
-    traceFile = (char*)malloc(n);
+    char* destination = (char*)malloc(n);
     uint i = 0;
     while (source[i] != '\0') 
     {
-        traceFile[i] = source[i];
+        destination[i] = source[i];
         ++i;
     }
-    traceFile[i] = '\0';
+    destination[i] = '\0';
+    return destination;
 }
 
 void getFlag(uint argc, char **argv)
@@ -97,22 +96,19 @@ void getFlag(uint argc, char **argv)
                 break;
         }
     }
-    //debug
-    //fpruintf(stderr, "E: %d, s: %d, t: %s, b: %d", Eway, setBit, traceFile, blockBit);
     tagBit = 64 - setBit - blockBit;
     noOfSet = 1 << setBit;
 }
 
 void Init()
 {
-    //uint noOfSet = 1 << setBit;
     cache.s = (sSet*)malloc(sizeof(sSet) * noOfSet);
     for (uint i = 0 ; i < noOfSet; ++i)
     {
         cache.s[i].LRU = 0;
         cache.s[i].way = (sWay*)malloc(sizeof(sWay) * Eway);
         for (uint j = 0; j < Eway; ++j)
-            cache.s[i].way[j].time = cache.s[i].way[j].block = cache.s[i].way[j].tag = cache.s[i].way[j].valid = 0;
+            cache.s[i].way[j].time /*= cache.s[i].way[j].block*/ = cache.s[i].way[j].tag = cache.s[i].way[j].valid = 0;
     }
 }
 
@@ -139,19 +135,18 @@ uint Access(uint tag, sSet* set)
             result = HIT;
         }
     }
-    //if (result == HIT) return result;
-    
     
     if (result != HIT) 
     //if there is an invalid one
-        for (uint i = 0; i < Eway; ++i)
-            if (set->way[i].valid == 0) 
-            {
-                set->way[i].valid = 1;
-                set->way[i].tag = tag;
-                set->way[i].time = 0;
-                result = MISS;
-            }
+    for (uint i = 0; i < Eway; ++i)
+        if (set->way[i].valid == 0) 
+        {
+            set->way[i].valid = 1;
+            set->way[i].tag = tag;
+            set->way[i].time = 0;
+            result = MISS;
+            break;
+        }
 
     //if everything is valid
     if (result == EVICTION)
@@ -193,102 +188,41 @@ uint LoadAndStore(ull address)
 
 uint Modify(ull address)
 {
-    uint set = getSet(address);
-    uint tag = getTag(address);
-    uint ret = 0;
-    uint val = Access(tag, cache.s+set);
-    switch (val)
-    {
-        case MISS:
-            ++result[MISS];
-            break;
-        case HIT:
-            ++result[HIT];
-            break;
-        case EVICTION:
-            ++result[MISS];
-            ++result[EVICTION];
-            break;
-    }
-    ret = val;
-    
-    val = Access(tag, cache.s+set);
-    switch (val)
-    {
-        case MISS:
-            ++result[MISS];
-            break;
-        case HIT:
-            ++result[HIT];
-            break;
-        case EVICTION:
-            ++result[MISS];
-            ++result[EVICTION];
-            break;
-    }
-
-    return val;
+    //uint set = getSet(address);
+    //uint tag = getTag(address);
+    uint ret = LoadAndStore(address);
+    LoadAndStore(address);
+    return ret;
 }
-
-
 
 void HandleQuery(char instruction, ull address, uint size, uint verbose)
 {
-    //printf("%d %d %d\n",instruction,address,size);
     uint opt;
     switch (instruction)
     {
         case 'L':
         case 'S':
             opt = LoadAndStore(address);
-            if (verbose == 0)
-                break;
-            else 
-            {
-                if (opt == HIT)
-                    printf("%c %llx,%d hit\n",instruction, address, size);
-                else if (opt == MISS)
-                    printf("%c %llx,%d miss\n",instruction, address, size);
-                else 
-                    printf("%c %llx,%d miss eviction\n",instruction, address, size);
-            }
             break;
         case 'M':
             opt = Modify(address);
-            if (verbose == 0)
-                break;
-            else 
-            {
-                if (opt == HIT)
-                    printf("%c %llx,%d hit hit\n",instruction, address, size);
-                else if (opt == MISS)
-                    printf("%c %llx,%d miss hit\n",instruction, address, size);
-                else 
-                    printf("%c %llx,%d miss eviction hit\n",instruction, address, size);
-            }
             break;
-    }
-}
-
-int getInstruction(char* temp)
-{
-    if (temp == NULL) return -1;
-    switch (temp[0])
-    {
-        case 'I':
-            return IGNORE;
-        case 'L':
-            return LOAD;
-        case 'M':
-            return MODIFY;
-        case 'S':
-            return STORE;
         default:
-            break;
+            return;
     }
-    return -1;
-}
 
+    if (verbose == 0)
+        return;
+    else 
+    {
+        if (opt == HIT)
+            printf("%c %llx,%d hit\n",instruction, address, size);
+        else if (opt == MISS)
+            printf("%c %llx,%d miss\n",instruction, address, size);
+        else 
+            printf("%c %llx,%d miss eviction\n",instruction, address, size);
+    }
+}
 void inputHandle()
 {
     
@@ -303,13 +237,10 @@ void inputHandle()
     {
         strtok(buf, "\n");
         char temp;
-        //uint instruction;
         ull address;
         uint size;
         if (buf[0] == '0') continue;
         sscanf(buf, " %c %llx,%d", &temp, &address, &size);
-        //instruction = getInstruction(&temp);
-        //if (verbose == 1)
         HandleQuery(temp, address, size, verbose);
     }
     fclose(fp);
@@ -320,7 +251,7 @@ int main(int argc, char **argv)
     getFlag(argc, argv);
     Init();
     inputHandle();
-    printSummary(0, 0, 0);
+    printSummary(result[1], result[0], result[2]);
     Halt();
     return 0;
 }
