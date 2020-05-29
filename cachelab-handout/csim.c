@@ -136,6 +136,7 @@ uint Access(uint tag, sSet* set)
         }
     }
     
+    
     if (result != HIT) 
     //if there is an invalid one
     for (uint i = 0; i < Eway; ++i)
@@ -203,24 +204,32 @@ void HandleQuery(char instruction, ull address, uint size, uint verbose)
         case 'L':
         case 'S':
             opt = LoadAndStore(address);
+            if (verbose == 0)
+                break;
+            else 
+            {
+                if (opt == HIT)
+                    printf("%c %llx,%d hit\n",instruction, address, size);
+                else if (opt == MISS)
+                    printf("%c %llx,%d miss\n",instruction, address, size);
+                else 
+                    printf("%c %llx,%d miss eviction\n",instruction, address, size);
+            }
             break;
         case 'M':
             opt = Modify(address);
+            if (verbose == 0)
+                break;
+            else 
+            {
+                if (opt == HIT)
+                    printf("%c %llx,%d hit hit\n",instruction, address, size);
+                else if (opt == MISS)
+                    printf("%c %llx,%d miss hit\n",instruction, address, size);
+                else 
+                    printf("%c %llx,%d miss eviction hit\n",instruction, address, size);
+            }
             break;
-        default:
-            return;
-    }
-
-    if (verbose == 0)
-        return;
-    else 
-    {
-        if (opt == HIT)
-            printf("%c %llx,%d hit\n",instruction, address, size);
-        else if (opt == MISS)
-            printf("%c %llx,%d miss\n",instruction, address, size);
-        else 
-            printf("%c %llx,%d miss eviction\n",instruction, address, size);
     }
 }
 void inputHandle()
