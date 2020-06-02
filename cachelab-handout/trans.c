@@ -23,14 +23,47 @@ char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
     int temp = 0;
+    int d = 0;
     if (N == 32)
     {
-        for (int blockR = 0; blockR < 8; blockR+=8)
-            for (int blockC = 0; blockC < 8; blockC+=8)
+        for (int blockC = 0; blockC < N; blockC+=8)
+            for (int blockR = 0; blockR < N; blockR+=8)
             {
                 for (int i = blockR; i < blockR + 8; ++i)
+                {
                     for (int j = blockC; j < blockC + 8; ++j)
-                        B[i][j] = A[j][i];
+                        if (i != j) 
+                            B[j][i] = A[i][j];
+                        else 
+                        {
+                            temp = A[i][j];
+                            d = i;
+                        }
+                    if (blockC == blockR) B[d][d] = temp;
+                }
+            }
+    }
+    else if (N == 64)
+    {
+
+    }
+    else 
+    {
+        for (int blockC = 0; blockC < N; blockC+=8)
+            for (int blockR = 0; blockR < N; blockR+=8)
+            {
+                for (int i = blockR; (i < N) && (i < blockR + 8); ++i)
+                {
+                    for (int j = blockC; (j < M) && (j < blockC + 8); ++j)
+                        if (i != j) 
+                            B[j][i] = A[i][j];
+                        else 
+                        {
+                            temp = A[i][j];
+                            d = i;
+                        }
+                    if (blockC == blockR) B[d][d] = temp;
+                }
             }
     }
 }
