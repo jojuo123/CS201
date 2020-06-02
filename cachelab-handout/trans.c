@@ -45,7 +45,7 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
     }
     else if (N == 64)
     {
-
+        trans64(M, N, A, B);
     }
     else 
     {
@@ -75,8 +75,9 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 void trans64(int M, int N, int A[N][M], int B[M][N])
 {
     int t0, t1, t2, t3, t4, t5, t6, t7;
-    for (int blockC = 0; blockC < M; blockC+=8)
-        for (int blockR = 0; blockR < N; blockR+=8)
+
+    for (int blockR = 0; blockR < N; blockR+=8)
+        for (int blockC = 0; blockC < M; blockC+=8)
         {
             for (int i = blockR; i < blockR + 4; ++i)
             {
@@ -120,9 +121,14 @@ void trans64(int M, int N, int A[N][M], int B[M][N])
                 B[blockR+5][i] = t5;
                 B[blockR+6][i] = t6;
                 B[blockR+7][i] = t7;
+
+                for (l = 0; l < 4; l++) 
+                {
+	                B[i+4][i+l+4] = A[i+l+4][i+4];
+	            }
             }
             //A[blockR+4][blockC+4]
-            for (int i = blockR+4; i < blockR + 8; ++i)
+            /*for (int i = blockR+4; i < blockR + 8; ++i)
             {
                 for (int j = blockC + 4; blockC + 8; ++j)
                     if (i != j) 
@@ -133,7 +139,7 @@ void trans64(int M, int N, int A[N][M], int B[M][N])
                         t1 = i;
                     }
                 if (blockC == blockR) B[t1][t1] = t0;
-            }
+            }*/
         }
 }
 
