@@ -118,10 +118,10 @@ void trans64(int M, int N, int A[N][M], int B[M][N])
                 B[i][blockR+6] = t2;
                 B[i][blockR+7] = t3;
 
-                B[blockR+4][i+0] = t4;
-                B[blockR+4][i+1] = t5;
-                B[blockR+4][i+2] = t6;
-                B[blockR+4][i+3] = t7;
+                B[i+4][blockR+0] = t4;
+                B[i+4][blockR+1] = t5;
+                B[i+4][blockR+2] = t6;
+                B[i+4][blockR+3] = t7;
 
                 for (l = 0; l < 4; ++l) 
                 {
