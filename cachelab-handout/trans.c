@@ -72,6 +72,70 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
  * You can define additional transpose functions below. We've defined
  * a simple one below to help you get started. 
  */ 
+void trans64(int M, int N, int A[N][M], int B[M][N])
+{
+    int t0, t1, t2, t3, t4, t5, t6, t7;
+    for (int blockC = 0; blockC < M; blockC+=8)
+        for (int blockR = 0; blockR < N; blockR+=8)
+        {
+            for (int i = blockR; i < blockR + 4; ++i)
+            {
+                t0 = A[i][blockC+0];
+                t1 = A[i][blockC+1];
+                t2 = A[i][blockC+2];
+                t3 = A[i][blockC+3];
+                t4 = A[i][blockC+4];
+                t5 = A[i][blockC+5];
+                t6 = A[i][blockC+6];
+                t7 = A[i][blockC+7];
+
+                B[blockC+0][i] = t0;
+                B[blockC+1][i] = t1;
+                B[blockC+2][i] = t2;
+                B[blockC+3][i] = t3;
+
+                B[blockC+0][i+4] = t4;
+                B[blockC+1][i+4] = t5;
+                B[blockC+2][i+4] = t6;
+                B[blockC+3][i+4] = t7;
+            }
+            for (int i = blockC; i < blockC + 4; ++i)
+            {
+                t0 = A[blockR+4][i];
+                t1 = A[blockR+5][i];
+                t2 = A[blockR+6][i];
+                t3 = A[blockR+7][i];
+
+                t4 = B[i][blockR+4];
+                t5 = B[i][blockR+5];
+                t6 = B[i][blockR+6];
+                t7 = B[i][blockR+7];
+
+                B[i][blockR+4] = t0;
+                B[i][blockR+5] = t1;
+                B[i][blockR+6] = t2;
+                B[i][blockR+7] = t3;
+
+                B[blockR+4][i] = t4;
+                B[blockR+5][i] = t5;
+                B[blockR+6][i] = t6;
+                B[blockR+7][i] = t7;
+            }
+            //A[blockR+4][blockC+4]
+            for (int i = blockR+4; i < blockR + 8; ++i)
+            {
+                for (int j = blockC + 4; blockC + 8; ++j)
+                    if (i != j) 
+                        B[j][i] = A[i][j];
+                    else 
+                    {
+                        t0 = A[i][j];
+                        t1 = i;
+                    }
+                if (blockC == blockR) B[t1][t1] = t0;
+            }
+        }
+}
 
 /* 
  * trans - A simple baseline transpose function, not optimized for the cache.
