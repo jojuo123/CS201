@@ -49,7 +49,7 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
     }
     else 
     {
-        for (int blockC = 0; blockR < M; blockR+=8)
+        for (int blockC = 0; blockC < M; blockC+=8)
             for (int blockR = 0; blockR < N; blockR+=8)
             {
                 for (int i = blockR; (i < N) && (i < blockR + 8); ++i)
