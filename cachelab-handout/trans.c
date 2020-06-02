@@ -76,11 +76,11 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 void trans64(int M, int N, int A[N][M], int B[M][N])
 {
     int t0, t1, t2, t3, t4, t5, t6, t7, l;
-
-    for (int blockR = 0; blockR < N; blockR+=8)
-        for (int blockC = 0; blockC < M; blockC+=8)
+    int blockR, blockC, i;
+    for (blockR = 0; blockR < N; blockR+=8)
+        for (blockC = 0; blockC < M; blockC+=8)
         {
-            for (int i = blockR; i < blockR + 4; ++i)
+            for (i = blockR; i < blockR + 4; ++i)
             {
                 t0 = A[i][blockC+0];
                 t1 = A[i][blockC+1];
@@ -125,7 +125,7 @@ void trans64(int M, int N, int A[N][M], int B[M][N])
 
                 for (l = 0; l < 4; ++l) 
                 {
-	                B[i+4][i+l+4] = A[i+l+4][i+4];
+	                B[i+4][blockR+l+4] = A[blockR+l+4][i+4];
 	            }
             }
             //A[blockR+4][blockC+4]
